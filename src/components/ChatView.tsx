@@ -3,12 +3,11 @@
    چیٹ ویو کمپوننٹ (انفرادی چیٹ)
    ======================================== */
 
-import React, { useState } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import {
   BackButton,
   VideoCallButton,
   VoiceCallButton,
-  MoreOptionsButton,
   EmojiButton,
   AttachButton,
   CameraInputButton,
@@ -16,7 +15,13 @@ import {
   SendButton,
   DoubleCheckIcon,
   SingleCheckIcon,
+  ChatThemeMenuIcon,
+  ExportChatMenuIcon,
+  ClearChatMenuIcon,
+  DeleteChatMenuIcon,
+  BlockMenuIcon,
 } from "@/NZG73Button";
+import { MoreVertical } from "lucide-react";
 import type { ChatItem } from "./ChatList";
 
 interface Message {
@@ -44,13 +49,24 @@ const avatarColors = [
 interface ChatViewProps {
   chat: ChatItem;
   onBack: () => void;
+  onHeaderClick: () => void;
+  onAudioCall: () => void;
+  onVideoCall: () => void;
 }
 
-const ChatView: React.FC<ChatViewProps> = ({ chat, onBack }) => {
+const ChatView: React.FC<ChatViewProps> = ({ chat, onBack, onHeaderClick, onAudioCall, onVideoCall }) => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>(demoMessages);
+  const [showMenu, setShowMenu] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const handleSend = () => {
+  const colorIndex = chat.name.charCodeAt(0) % avatarColors.length;
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const handleSend = useCallback(() => {
     if (!message.trim()) return;
     const newMsg: Message = {
       id: Date.now().toString(),
@@ -59,28 +75,94 @@ const ChatView: React.FC<ChatViewProps> = ({ chat, onBack }) => {
       sent: true,
       read: false,
     };
-    setMessages([...messages, newMsg]);
+    setMessages((prev) => [...prev, newMsg]);
     setMessage("");
-  };
+  }, [message]);
 
-  const colorIndex = chat.name.charCodeAt(0) % avatarColors.length;
+  const handleClearChat = useCallback(() => {
+    setMessages([]);
+    setShowMenu(false);
+  }, []);
+
+  const handleDeleteChat = useCallback(() => {
+    setMessages([]);
+    setShowMenu(false);
+    onBack();
+  }, [onBack]);
+
+  /* Chat Menu Items Definition */
+  /* چیٹ مینو آئٹمز تعریف */
+  const menuItems = [
+    { key: "theme", label: "Chat theme", icon: <ChatThemeMenuIcon />, action: () => setShowMenu(false) },
+    { key: "export", label: "Export chat", icon: <ExportChatMenuIcon />, action: () => {
+      const text = messages.map((m) => `[${m.time}] ${m.sent ? "You" : chat.name}: ${m.text}`).join("\n");
+      const blob = new Blob([text], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `chat_${chat.name.replace(/\s+/g, "_")}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setShowMenu(false);
+    }},
+    { key: "clear", label: "Clear chat", icon: <ClearChatMenuIcon />, action: handleClearChat },
+    { key: "delete", label: "Permanent delete", icon: <DeleteChatMenuIcon />, action: handleDeleteChat, danger: true },
+    { key: "block", label: "Block", icon: <BlockMenuIcon />, action: () => setShowMenu(false), danger: true },
+  ];
+  /* (Chat Menu Items Definition - ختم ہو گیا ہے) */
 
   return (
     <div className="flex flex-col h-full">
       {/* Chat Header */}
       {/* چیٹ ہیڈر */}
-      <div className="flex items-center gap-2 px-1 py-2 bg-wa-header">
+      <div className="flex items-center gap-2 px-1 py-2 bg-wa-header relative">
         <BackButton onClick={onBack} />
-        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-primary-foreground font-semibold shrink-0 ${avatarColors[colorIndex]}`}>
-          {chat.name.charAt(0).toUpperCase()}
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="font-medium text-[16px] text-wa-header-foreground truncate">{chat.name}</p>
-          <p className="text-xs text-wa-tab-inactive">online</p>
-        </div>
-        <VideoCallButton />
-        <VoiceCallButton />
-        <MoreOptionsButton />
+        {/* Clickable Header Area - Opens About Page */}
+        {/* کلک ایبل ہیڈر ایریا - اباؤٹ پیج کھولتا ہے */}
+        <button onClick={onHeaderClick} className="flex items-center gap-2 flex-1 min-w-0">
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-primary-foreground font-semibold shrink-0 ${avatarColors[colorIndex]}`}>
+            {chat.name.charAt(0).toUpperCase()}
+          </div>
+          <div className="min-w-0 text-left">
+            <p className="font-medium text-[16px] text-wa-header-foreground truncate">{chat.name}</p>
+            <p className="text-xs text-wa-tab-inactive">online</p>
+          </div>
+        </button>
+        {/* (Clickable Header Area - ختم ہو گیا ہے) */}
+        <VideoCallButton onClick={onVideoCall} />
+        <VoiceCallButton onClick={onAudioCall} />
+
+        {/* Three Dot Menu Button */}
+        {/* تھری ڈاٹ مینو بٹن */}
+        <button
+          onClick={() => setShowMenu(!showMenu)}
+          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
+          aria-label="More options"
+        >
+          <MoreVertical size={22} />
+        </button>
+        {/* (Three Dot Menu Button - ختم ہو گیا ہے) */}
+
+        {/* Chat Dropdown Menu */}
+        {/* چیٹ ڈراپ ڈاؤن مینو */}
+        {showMenu && (
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
+            <div className="absolute right-2 top-14 bg-card rounded-lg shadow-xl z-50 py-2 min-w-[200px] border border-border">
+              {menuItems.map((item) => (
+                <button
+                  key={item.key}
+                  onClick={item.action}
+                  className="flex items-center gap-3 w-full text-left px-4 py-2.5 text-[15px] hover:bg-muted transition-colors"
+                >
+                  {item.icon}
+                  <span className={item.danger ? "text-destructive" : ""}>{item.label}</span>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+        {/* (Chat Dropdown Menu - ختم ہو گیا ہے) */}
       </div>
       {/* (Chat Header - ختم ہو گیا ہے) */}
 
@@ -88,11 +170,13 @@ const ChatView: React.FC<ChatViewProps> = ({ chat, onBack }) => {
       {/* میسجز ایریا */}
       <div className="flex-1 overflow-y-auto wa-chat-pattern wa-scrollbar px-3 py-2">
         {/* Date Badge */}
+        {/* تاریخ بیج */}
         <div className="flex justify-center my-3">
           <span className="bg-card text-muted-foreground text-xs px-3 py-1 rounded-lg shadow-sm">
             Today
           </span>
         </div>
+        {/* (Date Badge - ختم ہو گیا ہے) */}
 
         {messages.map((msg) => (
           <div
@@ -114,6 +198,7 @@ const ChatView: React.FC<ChatViewProps> = ({ chat, onBack }) => {
             </div>
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
       {/* (Messages Area - ختم ہو گیا ہے) */}
 

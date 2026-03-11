@@ -20,6 +20,7 @@ import {
   CheckCheck,
   Lock,
   Bell,
+  BellOff,
   Globe,
   HelpCircle,
   Users,
@@ -46,6 +47,21 @@ import {
   Accessibility,
   QrCode,
   KeyRound,
+  PhoneCall,
+  PhoneOff,
+  MicOff,
+  Volume2,
+  VolumeX,
+  RotateCw,
+  Download,
+  Eye,
+  FileText,
+  ExternalLink,
+  AlertTriangle,
+  Ban,
+  Flag,
+  Timer,
+  ImageIcon,
 } from "lucide-react";
 import React from "react";
 
@@ -55,10 +71,11 @@ import React from "react";
    ---------------------------------------- */
 interface IconButtonProps {
   icon: React.ReactNode;
-  onClick?: () => void;
+  onClick?: (e?: React.MouseEvent) => void;
   className?: string;
   label?: string;
   size?: "sm" | "md" | "lg";
+  disabled?: boolean;
 }
 
 export const IconButton: React.FC<IconButtonProps> = ({
@@ -67,6 +84,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   className = "",
   label,
   size = "md",
+  disabled = false,
 }) => {
   const sizeClasses = {
     sm: "w-8 h-8",
@@ -77,6 +95,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   return (
     <button
       onClick={onClick}
+      disabled={disabled}
       className={`flex items-center justify-center rounded-full hover:bg-muted transition-colors ${sizeClasses[size]} ${className}`}
       aria-label={label}
     >
@@ -269,3 +288,95 @@ export const SecurityIcon = () => <Shield size={22} className="text-muted-foregr
 export const PlusIcon: React.FC<{ onClick?: () => void }> = ({ onClick }) => (
   <IconButton icon={<Plus size={22} />} onClick={onClick} label="Add" />
 );
+
+/* ----------------------------------------
+   Profile Popup Action Buttons
+   پروفائل پاپ اپ ایکشن بٹنز
+   ---------------------------------------- */
+export const PopupMessageIcon = () => <MessageCircle size={22} className="text-primary" />;
+export const PopupAudioCallIcon = () => <Phone size={22} className="text-primary" />;
+export const PopupVideoCallIcon = () => <Video size={22} className="text-primary" />;
+export const PopupInfoIcon = () => <Info size={22} className="text-primary" />;
+/* (Profile Popup Action Buttons - ختم ہو گیا ہے) */
+
+/* ----------------------------------------
+   Call Screen Buttons
+   کال سکرین بٹنز
+   ---------------------------------------- */
+export const EndCallButton: React.FC<{ onClick?: () => void }> = ({ onClick }) => (
+  <button
+    onClick={onClick}
+    className="w-16 h-16 rounded-full bg-destructive flex items-center justify-center text-destructive-foreground shadow-lg"
+    aria-label="End call"
+  >
+    <PhoneOff size={28} />
+  </button>
+);
+
+export const MuteCallButton: React.FC<{ muted: boolean; onClick?: () => void }> = ({ muted, onClick }) => (
+  <button
+    onClick={onClick}
+    className={`w-14 h-14 rounded-full flex items-center justify-center ${muted ? "bg-muted" : "bg-card"} shadow-md`}
+    aria-label={muted ? "Unmute" : "Mute"}
+  >
+    {muted ? <MicOff size={24} className="text-foreground" /> : <Mic size={24} className="text-foreground" />}
+  </button>
+);
+
+export const SpeakerButton: React.FC<{ active: boolean; onClick?: () => void }> = ({ active, onClick }) => (
+  <button
+    onClick={onClick}
+    className={`w-14 h-14 rounded-full flex items-center justify-center ${active ? "bg-muted" : "bg-card"} shadow-md`}
+    aria-label={active ? "Speaker off" : "Speaker on"}
+  >
+    {active ? <Volume2 size={24} className="text-foreground" /> : <VolumeX size={24} className="text-foreground" />}
+  </button>
+);
+
+export const VideoToggleButton: React.FC<{ active: boolean; onClick?: () => void }> = ({ active, onClick }) => (
+  <button
+    onClick={onClick}
+    className={`w-14 h-14 rounded-full flex items-center justify-center ${active ? "bg-card" : "bg-muted"} shadow-md`}
+    aria-label={active ? "Video off" : "Video on"}
+  >
+    <Video size={24} className="text-foreground" />
+  </button>
+);
+/* (Call Screen Buttons - ختم ہو گیا ہے) */
+
+/* ----------------------------------------
+   Media Viewer Action Icons
+   میڈیا ویور ایکشن آئیکنز
+   ---------------------------------------- */
+export const RotateIcon = () => <RotateCw size={20} />;
+export const SaveIcon = () => <Download size={20} />;
+export const ViewInGalleryIcon = () => <Eye size={20} />;
+export const FileDocIcon = () => <FileText size={20} className="text-muted-foreground" />;
+export const ExternalLinkIcon = () => <ExternalLink size={16} className="text-wa-link" />;
+/* (Media Viewer Action Icons - ختم ہو گیا ہے) */
+
+/* ----------------------------------------
+   About Page Action Icons
+   اباؤٹ پیج ایکشن آئیکنز
+   ---------------------------------------- */
+export const MuteIcon: React.FC<{ muted: boolean }> = ({ muted }) => (
+  muted ? <BellOff size={22} className="text-muted-foreground" /> : <Bell size={22} className="text-muted-foreground" />
+);
+export const LockChatIcon = () => <Lock size={22} className="text-muted-foreground" />;
+export const DisappearingIcon = () => <Timer size={22} className="text-muted-foreground" />;
+export const BlockIcon = () => <Ban size={22} className="text-destructive" />;
+export const ReportIcon = () => <Flag size={22} className="text-destructive" />;
+export const ClearChatIcon = () => <Trash2 size={22} className="text-destructive" />;
+export const MediaIcon = () => <ImageIcon size={22} className="text-muted-foreground" />;
+/* (About Page Action Icons - ختم ہو گیا ہے) */
+
+/* ----------------------------------------
+   Chat Menu Icons
+   چیٹ مینو آئیکنز
+   ---------------------------------------- */
+export const ChatThemeMenuIcon = () => <Palette size={18} className="text-muted-foreground" />;
+export const ExportChatMenuIcon = () => <Share2 size={18} className="text-muted-foreground" />;
+export const ClearChatMenuIcon = () => <Trash2 size={18} className="text-muted-foreground" />;
+export const DeleteChatMenuIcon = () => <Trash2 size={18} className="text-destructive" />;
+export const BlockMenuIcon = () => <Ban size={18} className="text-destructive" />;
+/* (Chat Menu Icons - ختم ہو گیا ہے) */
