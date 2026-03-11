@@ -5,7 +5,7 @@
 
 import React from "react";
 import { DoubleCheckIcon, SingleCheckIcon, ArchiveIcon } from "@/NZG73Button";
-import { Archive, Pin, Image } from "lucide-react";
+import { Pin, Image } from "lucide-react";
 
 export interface ChatItem {
   id: string;
@@ -40,9 +40,10 @@ const avatarColors = [
 
 interface ChatListProps {
   onChatSelect: (chat: ChatItem) => void;
+  onAvatarClick: (chat: ChatItem) => void;
 }
 
-const ChatList: React.FC<ChatListProps> = ({ onChatSelect }) => {
+const ChatList: React.FC<ChatListProps> = ({ onChatSelect, onAvatarClick }) => {
   return (
     <div className="flex-1 overflow-y-auto wa-scrollbar">
       {/* Archived Row */}
@@ -58,19 +59,30 @@ const ChatList: React.FC<ChatListProps> = ({ onChatSelect }) => {
       {/* Chat Items */}
       {/* چیٹ آئٹمز */}
       {demoChats.map((chat, index) => (
-        <button
+        <div
           key={chat.id}
-          onClick={() => onChatSelect(chat)}
           className="flex items-center gap-3 w-full px-4 py-3 hover:bg-muted transition-colors border-b border-wa-divider"
         >
-          {/* Avatar */}
-          {/* اوتار */}
-          <div className={`w-12 h-12 rounded-full flex items-center justify-center text-primary-foreground font-semibold text-lg shrink-0 ${avatarColors[index % avatarColors.length]}`}>
+          {/* Avatar - Separate Click Handler for Profile Popup */}
+          {/* اوتار - پروفائل پاپ اپ کے لیے علیحدہ کلک ہینڈلر */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onAvatarClick(chat);
+            }}
+            className={`w-12 h-12 rounded-full flex items-center justify-center text-primary-foreground font-semibold text-lg shrink-0 ${avatarColors[index % avatarColors.length]} active:scale-95 transition-transform`}
+            aria-label={`View ${chat.name}'s profile`}
+          >
             {chat.name.charAt(0).toUpperCase()}
-          </div>
+          </button>
           {/* (Avatar - ختم ہو گیا ہے) */}
 
-          <div className="flex-1 min-w-0 text-left">
+          {/* Chat Info - Opens Chat */}
+          {/* چیٹ انفو - چیٹ کھولتا ہے */}
+          <button
+            onClick={() => onChatSelect(chat)}
+            className="flex-1 min-w-0 text-left"
+          >
             <div className="flex items-center justify-between">
               <span className="font-medium text-[15px] truncate">{chat.name}</span>
               <span className={`text-xs shrink-0 ${chat.unread ? "text-wa-unread-badge font-semibold" : "text-wa-timestamp"}`}>
@@ -94,8 +106,9 @@ const ChatList: React.FC<ChatListProps> = ({ onChatSelect }) => {
                 )}
               </div>
             </div>
-          </div>
-        </button>
+          </button>
+          {/* (Chat Info - ختم ہو گیا ہے) */}
+        </div>
       ))}
       {/* (Chat Items - ختم ہو گیا ہے) */}
     </div>
