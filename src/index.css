@@ -2,95 +2,127 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* ========================================
+   WhatsApp Clone Design System
+   واٹس ایپ کلون ڈیزائن سسٹم
+   ======================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap');
 
 @layer base {
   :root {
+    /* WhatsApp Light Theme Colors */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 0 0% 7%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 0 0% 7%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 0 0% 7%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* WhatsApp Green */
+    --primary: 152 69% 31%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 120 20% 95%;
+    --secondary-foreground: 0 0% 20%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 120 10% 95%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 152 69% 31%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 0 0% 88%;
+    --input: 0 0% 88%;
+    --ring: 152 69% 31%;
 
     --radius: 0.5rem;
 
+    /* WhatsApp specific tokens */
+    --wa-header: 152 69% 31%;
+    --wa-header-foreground: 0 0% 100%;
+    --wa-chat-bg: 36 33% 94%;
+    --wa-bubble-sent: 120 35% 85%;
+    --wa-bubble-received: 0 0% 100%;
+    --wa-tab-active: 0 0% 100%;
+    --wa-tab-inactive: 152 30% 60%;
+    --wa-unread-badge: 152 69% 31%;
+    --wa-online: 152 69% 45%;
+    --wa-link: 210 100% 40%;
+    --wa-search-bg: 0 0% 96%;
+    --wa-divider: 0 0% 92%;
+    --wa-fab: 152 69% 31%;
+    --wa-timestamp: 0 0% 55%;
+
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* WhatsApp Dark Theme Colors */
+    --background: 200 10% 10%;
+    --foreground: 0 0% 90%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 200 10% 13%;
+    --card-foreground: 0 0% 90%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 200 10% 13%;
+    --popover-foreground: 0 0% 90%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 152 55% 40%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 200 8% 18%;
+    --secondary-foreground: 0 0% 85%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 200 8% 18%;
+    --muted-foreground: 0 0% 55%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 152 55% 40%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --border: 200 8% 20%;
+    --input: 200 8% 20%;
+    --ring: 152 55% 40%;
+
+    /* WhatsApp Dark specific tokens */
+    --wa-header: 200 12% 15%;
+    --wa-header-foreground: 0 0% 90%;
+    --wa-chat-bg: 200 10% 8%;
+    --wa-bubble-sent: 152 35% 20%;
+    --wa-bubble-received: 200 10% 18%;
+    --wa-tab-active: 152 55% 40%;
+    --wa-tab-inactive: 0 0% 50%;
+    --wa-unread-badge: 152 55% 40%;
+    --wa-online: 152 55% 45%;
+    --wa-link: 210 80% 60%;
+    --wa-search-bg: 200 8% 15%;
+    --wa-divider: 200 8% 18%;
+    --wa-fab: 152 55% 40%;
+    --wa-timestamp: 0 0% 50%;
+
+    --sidebar-background: 200 10% 10%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 152 55% 40%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 200 8% 18%;
+    --sidebar-accent-foreground: 0 0% 90%;
+    --sidebar-border: 200 8% 20%;
+    --sidebar-ring: 152 55% 40%;
   }
 }
 
@@ -101,5 +133,26 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
   }
+}
+
+/* WhatsApp Chat Background Pattern */
+/* واٹس ایپ چیٹ بیک گراؤنڈ پیٹرن */
+.wa-chat-pattern {
+  background-color: hsl(var(--wa-chat-bg));
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* WhatsApp Scrollbar */
+/* واٹس ایپ سکرول بار */
+.wa-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.wa-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.wa-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 3px;
 }
