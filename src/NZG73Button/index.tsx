@@ -157,6 +157,11 @@ export const MicButton: React.FC<{ onClick?: () => void }> = ({ onClick }) => (
 export const SendButton: React.FC<{ onClick?: () => void }> = ({ onClick }) => (
   <IconButton icon={<Send size={20} />} onClick={onClick} label="Send" className="bg-wa-fab text-primary-foreground hover:bg-primary" />
 );
+
+export const AttachmentGalleryIcon = () => <Image size={24} className="text-primary" />;
+export const AttachmentCameraIcon = () => <Camera size={24} className="text-primary" />;
+export const AttachmentDocumentIcon = () => <FileText size={24} className="text-primary" />;
+export const AttachmentAudioIcon = () => <Mic size={24} className="text-primary" />;
 /* (Chat Input Buttons - ختم ہو گیا ہے) */
 
 /* ----------------------------------------
