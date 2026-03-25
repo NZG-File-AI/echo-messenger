@@ -23,6 +23,7 @@ import {
 } from "@/NZG73Button";
 import { MoreVertical } from "lucide-react";
 import type { ChatItem } from "./ChatList";
+import ChatAttachmentTray from "./ChatAttachmentTray";
 
 interface Message {
   id: string;
@@ -46,6 +47,12 @@ const avatarColors = [
   "bg-pink-500", "bg-teal-500", "bg-red-500",
 ];
 
+const formatDuration = (seconds: number) => {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+};
+
 interface ChatViewProps {
   chat: ChatItem;
   onBack: () => void;
@@ -58,7 +65,17 @@ const ChatView: React.FC<ChatViewProps> = ({ chat, onBack, onHeaderClick, onAudi
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>(demoMessages);
   const [showMenu, setShowMenu] = useState(false);
+  const [showAttachmentTray, setShowAttachmentTray] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [composerHint, setComposerHint] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const attachmentContainerRef = useRef<HTMLDivElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const documentInputRef = useRef<HTMLInputElement>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
+  const filePickerLockRef = useRef(false);
 
   const colorIndex = chat.name.charCodeAt(0) % avatarColors.length;
 
@@ -66,27 +83,114 @@ const ChatView: React.FC<ChatViewProps> = ({ chat, onBack, onHeaderClick, onAudi
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = useCallback(() => {
-    if (!message.trim()) return;
+  useEffect(() => {
+    if (!isRecording) return;
+    const timerId = window.setInterval(() => {
+      setRecordingSeconds((prev) => prev + 1);
+    }, 1000);
+    return () => window.clearInterval(timerId);
+  }, [isRecording]);
+
+  useEffect(() => {
+    if (!showAttachmentTray) return;
+
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (
+        attachmentContainerRef.current &&
+        !attachmentContainerRef.current.contains(event.target as Node)
+      ) {
+        setShowAttachmentTray(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, [showAttachmentTray]);
+
+  const appendOutgoingMessage = useCallback((text: string) => {
     const newMsg: Message = {
       id: Date.now().toString(),
-      text: message,
+      text,
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       sent: true,
       read: false,
     };
     setMessages((prev) => [...prev, newMsg]);
+  }, []);
+
+  const handleSend = useCallback(() => {
+    if (!message.trim()) return;
+    appendOutgoingMessage(message.trim());
     setMessage("");
-  }, [message]);
+    setComposerHint("");
+    setShowAttachmentTray(false);
+  }, [appendOutgoingMessage, message]);
+
+  const openFilePicker = useCallback((type: "gallery" | "camera" | "document" | "audio") => {
+    if (filePickerLockRef.current) return;
+
+    const inputMap = {
+      gallery: galleryInputRef.current,
+      camera: cameraInputRef.current,
+      document: documentInputRef.current,
+      audio: audioInputRef.current,
+    };
+
+    const selectedInput = inputMap[type];
+    if (!selectedInput) return;
+
+    filePickerLockRef.current = true;
+    setShowAttachmentTray(false);
+    setComposerHint(`${type.charAt(0).toUpperCase()}${type.slice(1)} picker opened`);
+    selectedInput.click();
+
+    window.setTimeout(() => {
+      filePickerLockRef.current = false;
+    }, 250);
+  }, []);
+
+  const handleFileSelected = useCallback((label: string, event: React.ChangeEvent<HTMLInputElement>) => {
+    const pickedFile = event.target.files?.[0];
+    if (!pickedFile) {
+      event.target.value = "";
+      return;
+    }
+
+    appendOutgoingMessage(`${label}: ${pickedFile.name}`);
+    setComposerHint(`${label} attached`);
+    event.target.value = "";
+  }, [appendOutgoingMessage]);
+
+  const handleMicButton = useCallback(() => {
+    if (isRecording) {
+      appendOutgoingMessage(`Voice note (${formatDuration(recordingSeconds)})`);
+      setIsRecording(false);
+      setRecordingSeconds(0);
+      setComposerHint("Voice note sent");
+      return;
+    }
+
+    setIsRecording(true);
+    setShowAttachmentTray(false);
+    setComposerHint("Recording... tap mic again to send");
+  }, [appendOutgoingMessage, isRecording, recordingSeconds]);
 
   const handleClearChat = useCallback(() => {
     setMessages([]);
     setShowMenu(false);
+    setShowAttachmentTray(false);
+    setIsRecording(false);
+    setRecordingSeconds(0);
+    setComposerHint("");
   }, []);
 
   const handleDeleteChat = useCallback(() => {
     setMessages([]);
     setShowMenu(false);
+    setShowAttachmentTray(false);
+    setIsRecording(false);
+    setRecordingSeconds(0);
+    setComposerHint("");
     onBack();
   }, [onBack]);
 
@@ -204,21 +308,71 @@ const ChatView: React.FC<ChatViewProps> = ({ chat, onBack, onHeaderClick, onAudi
 
       {/* Chat Input Bar */}
       {/* چیٹ ان پٹ بار */}
-      <div className="flex items-center gap-1 px-2 py-2 bg-background">
-        <div className="flex-1 flex items-center bg-wa-search-bg rounded-full px-1">
-          <EmojiButton />
-          <input
-            type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            placeholder="Message"
-            className="flex-1 bg-transparent text-sm py-2.5 px-2 outline-none text-foreground placeholder:text-muted-foreground"
+      <div ref={attachmentContainerRef} className="relative bg-background px-2 py-2">
+        {showAttachmentTray && (
+          <ChatAttachmentTray
+            onGallery={() => openFilePicker("gallery")}
+            onCamera={() => openFilePicker("camera")}
+            onDocument={() => openFilePicker("document")}
+            onAudio={() => openFilePicker("audio")}
           />
-          <AttachButton />
-          <CameraInputButton />
+        )}
+
+        <div className="flex items-center gap-1">
+          <div className="flex-1 flex items-center bg-wa-search-bg rounded-full px-1">
+            <EmojiButton onClick={() => setComposerHint("Emoji panel will be added next")} />
+            <input
+              type="text"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onFocus={() => setShowAttachmentTray(false)}
+              onKeyDown={(e) => e.key === "Enter" && handleSend()}
+              placeholder="Message"
+              className="flex-1 bg-transparent text-sm py-2.5 px-2 outline-none text-foreground placeholder:text-muted-foreground"
+            />
+            <AttachButton onClick={() => setShowAttachmentTray((prev) => !prev)} />
+            <CameraInputButton onClick={() => openFilePicker("camera")} />
+          </div>
+          {message.trim() ? <SendButton onClick={handleSend} /> : <MicButton onClick={handleMicButton} />}
         </div>
-        {message.trim() ? <SendButton onClick={handleSend} /> : <MicButton />}
+
+        <div className="h-4 px-2 pt-1">
+          {isRecording ? (
+            <p className="text-[11px] text-muted-foreground">Recording {formatDuration(recordingSeconds)}</p>
+          ) : composerHint ? (
+            <p className="text-[11px] text-muted-foreground truncate">{composerHint}</p>
+          ) : null}
+        </div>
+
+        <input
+          ref={galleryInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(event) => handleFileSelected("Gallery", event)}
+        />
+        <input
+          ref={cameraInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          onChange={(event) => handleFileSelected("Camera", event)}
+        />
+        <input
+          ref={documentInputRef}
+          type="file"
+          accept=".pdf,.doc,.docx,.txt,.xls,.xlsx"
+          className="hidden"
+          onChange={(event) => handleFileSelected("Document", event)}
+        />
+        <input
+          ref={audioInputRef}
+          type="file"
+          accept="audio/*"
+          className="hidden"
+          onChange={(event) => handleFileSelected("Audio", event)}
+        />
       </div>
       {/* (Chat Input Bar - ختم ہو گیا ہے) */}
     </div>
